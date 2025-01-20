@@ -1,0 +1,49 @@
+# Build artifacts
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.csproj.user
+*.sln.docstates
+.vscode/
+
+# Logs
+*.log
+*.tlog
+
+# Cache and generated files
+*.cache
+*.nuget.g.props
+*.nuget.g.targets
+*.dgspec.json
+*.csproj.nuget.g.*
+
+# Coverage and test results
+*.coverage
+*.coveragexml
+TestResults/
+
+# Scaffolding
+ScaffoldingReadMe.txt
+
+# Static web assets
+staticwebassets/
+wwwroot/lib/
+obj/
+bin/
+
+# IDE-specific files
+.idea/
+*.sln.iml
+.vs/
+
+# Configuration overrides
+appsettings.Development.json
+appsettings.Local.json
+
+# Miscellaneous
+*.gz
+*.DS_Store
+Thumbs.db
