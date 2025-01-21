@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using GoodReads.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace GoodReads.Data
@@ -32,6 +33,11 @@ namespace GoodReads.Data
 
             modelBuilder.Entity<GoodReads.Models.UserBook>()
                .HasKey(ab => new { ab.BookId, ab.UserId });
+
+            modelBuilder.Entity<Genre>()
+                .HasMany(g => g.BookGenres)
+                .WithOne()
+                .IsRequired(false); // Marks the relationship as optional
         }
     }
 }

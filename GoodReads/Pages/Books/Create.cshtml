@@ -5,34 +5,43 @@
         ViewData["Title"] = "Create";
         }
         
-        <h1>Create</h1>
-        
-    <h4>Book</h4>
+    <h4>Add a new book</h4>
     <hr />
     <div class="row">
     <div class="col-md-4">
-    <form method="post">
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <!-- Book Name -->
             <div class="form-group">
                 <span class="text-danger">*</span>
                 <label asp-for="Book.Name" class="control-label"></label>
                 <input asp-for="Book.Name" class="form-control" />
                 <span asp-validation-for="Book.Name" class="text-danger"></span>
             </div>
+
+            <!-- Authors -->
             <div class="form-group">
-                <label asp-for="Book.CreatedAt" class="control-label"></label>
-                <input asp-for="Book.CreatedAt" class="form-control" />
-                <span asp-validation-for="Book.CreatedAt" class="text-danger"></span>
+                <label>Authors</label>
+                <select asp-for="SelectedAuthors" asp-items="Model.AuthorList" class="form-control" multiple>
+                </select>
+                <span class="form-text">Hold down the Ctrl (Windows) or Command (Mac) key to select multiple authors.</span>
             </div>
+
+            <!-- Genres -->
             <div class="form-group">
-                <label asp-for="Book.UpdatedAt" class="control-label"></label>
-                <input asp-for="Book.UpdatedAt" class="form-control" />
-                <span asp-validation-for="Book.UpdatedAt" class="text-danger"></span>
+                <label>Genres</label>
+                <select asp-for="SelectedGenres" asp-items="Model.GenreList" class="form-control" multiple>
+                </select>
+                <span class="form-text">Hold down the Ctrl (Windows) or Command (Mac) key to select multiple genres.</span>
             </div>
+
+            <!-- Submit Button -->
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>
         </form>
+
     </div>
 </div>
 

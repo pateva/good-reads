@@ -1,0 +1,66 @@
+﻿@page
+@model GoodReads.Pages.Ganres.CreateModel
+
+@{
+    ViewData["Title"] = "Add Genre";
+}
+
+<h4>Genres</h4>
+<hr />
+
+<!-- Button to Trigger Modal -->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addGenreModal">
+    Add Genre
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="addGenreModal" tabindex="-1" aria-labelledby="addGenreModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addGenreModalLabel">Add New Genre</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-group">
+                        <span class="text-danger">*</span>
+                        <label asp-for="Genre.GenreName" class="control-label"></label>
+                        <input asp-for="Genre.GenreName" class="form-control" />
+                        <span asp-validation-for="Genre.GenreName" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mt-3">
+                        <input type="submit" value="Add Genre" class="btn btn-primary" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include the Error Notification Partial -->
+@await Html.PartialAsync("_ErrorNotificationPartial")
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        function showErrorNotification(message) {
+            const errorToast = new bootstrap.Toast(document.getElementById('errorNotification'));
+            document.getElementById('errorMessage').innerText = message || "An error occurred.";
+            document.getElementById('errorNotification').style.display = "block";
+            errorToast.show();
+        }
+
+        // Display the notification if TempData contains an error message
+        document.addEventListener("DOMContentLoaded", function () {
+            const errorMessage = "@TempData["ErrorMessage"]";
+            if (errorMessage) {
+                showErrorNotification(errorMessage);
+            }
+        });
+    </script>
+}
