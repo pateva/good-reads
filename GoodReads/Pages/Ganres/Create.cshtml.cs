@@ -42,7 +42,7 @@ namespace GoodReads.Pages.Ganres
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = "Genre added successfully.";
-            return RedirectToPage("./Index");
+            return RedirectToPage("./Create");
         }
 
     }

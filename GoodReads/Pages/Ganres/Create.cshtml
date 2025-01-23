@@ -39,8 +39,9 @@
     </div>
 </div>
 
-<!-- Include the Error Notification Partial -->
-@await Html.PartialAsync("_ErrorNotificationPartial")
+<!-- Include the Notification Toast Partial -->
+@await Html.PartialAsync("_NotificationToastPartial")
+
 
 @section Scripts {
     @{
@@ -48,18 +49,38 @@
     }
 
     <script>
-        function showErrorNotification(message) {
-            const errorToast = new bootstrap.Toast(document.getElementById('errorNotification'));
-            document.getElementById('errorMessage').innerText = message || "An error occurred.";
-            document.getElementById('errorNotification').style.display = "block";
-            errorToast.show();
+        function showNotification(message, type) {
+            const toastElement = document.getElementById('notificationToast');
+            const toastBody = document.querySelector('#notificationToast .toast-body');
+
+            // Remove existing color classes
+            toastElement.classList.remove('text-bg-danger', 'text-bg-success');
+
+            // Add the appropriate color class based on the type
+            if (type === 'success') {
+                toastElement.classList.add('text-bg-success');
+            } else {
+                toastElement.classList.add('text-bg-danger');
+            }
+
+            // Set the message
+            toastBody.innerText = message || 'An error occurred.';
+
+            // Show the toast
+            const toast = new bootstrap.Toast(toastElement);
+            toastElement.style.display = 'block';
+            toast.show();
         }
 
-        // Display the notification if TempData contains an error message
         document.addEventListener("DOMContentLoaded", function () {
+            // Check for error or success messages in TempData
             const errorMessage = "@TempData["ErrorMessage"]";
+            const successMessage = "@TempData["SuccessMessage"]";
+
             if (errorMessage) {
-                showErrorNotification(errorMessage);
+                showNotification(errorMessage, 'error');
+            } else if (successMessage) {
+                showNotification(successMessage, 'success');
             }
         });
     </script>
