@@ -31,13 +31,21 @@ namespace GoodReads.Data
             modelBuilder.Entity<GoodReads.Models.BookGenre>()
                .HasKey(ab => new { ab.BookId, ab.GenreId });
 
+            // Configure one-to-many between Genre and BookGenre
+            modelBuilder.Entity<BookGenre>()
+                .HasOne(bg => bg.Genre)
+                .WithMany(g => g.BookGenres)
+                .HasForeignKey(bg => bg.GenreId);
+
+            // Configure one-to-many between Book and BookGenre
+            modelBuilder.Entity<BookGenre>()
+                .HasOne(bg => bg.Book)
+                .WithMany(b => b.BookGenres)
+                .HasForeignKey(bg => bg.BookId);
+
             modelBuilder.Entity<GoodReads.Models.UserBook>()
                .HasKey(ab => new { ab.BookId, ab.UserId });
 
-            modelBuilder.Entity<Genre>()
-                .HasMany(g => g.BookGenres)
-                .WithOne()
-                .IsRequired(false); // Marks the relationship as optional
         }
     }
 }

@@ -1,0 +1,20 @@
+﻿@page
+@model GoodReads.Pages.Ganres.IndexModel
+
+@{
+    ViewData["Title"] = "Genres";
+}
+
+<h2>Genres</h2>
+<hr />
+
+<div class="row">
+    @foreach (var genre in Model.Genres)
+    {
+        <div class="col-md-4 mb-3">
+            <a class="btn btn-outline-primary w-100" asp-page="/BookGenres/Details" asp-route-id="@genre.Id">
+                @genre.GenreName
+            </a>
+        </div>
+    }
+</div>

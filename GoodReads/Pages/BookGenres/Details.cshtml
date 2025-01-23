@@ -1,0 +1,32 @@
+﻿@page "{id:int}"
+@model GoodReads.Pages.BookGenres.DetailsModel
+
+@{
+    ViewData["Title"] = Model.Genre?.GenreName ?? "Genre Details";
+}
+
+<h2>@Model.Genre?.GenreName</h2>
+<hr />
+
+@if (Model.Books.Any())
+{
+    <ul>
+        @foreach (var book in Model.Books)
+        {
+            <li>@book.Name</li>
+        }
+    </ul>
+}
+else
+{
+    <p>No books found for this genre.</p>
+}
+
+
+<style>
+    .btn-outline-primary {
+        font-size: 1.2rem;
+        padding: 10px 15px;
+        text-align: center;
+    }
+</style>

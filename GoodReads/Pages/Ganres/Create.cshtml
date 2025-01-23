@@ -63,17 +63,14 @@
                 toastElement.classList.add('text-bg-danger');
             }
 
-            // Set the message
             toastBody.innerText = message || 'An error occurred.';
 
-            // Show the toast
             const toast = new bootstrap.Toast(toastElement);
             toastElement.style.display = 'block';
             toast.show();
         }
 
         document.addEventListener("DOMContentLoaded", function () {
-            // Check for error or success messages in TempData
             const errorMessage = "@TempData["ErrorMessage"]";
             const successMessage = "@TempData["SuccessMessage"]";
 

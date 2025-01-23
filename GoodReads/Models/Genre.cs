@@ -10,7 +10,7 @@ namespace GoodReads.Models
         [StringLength(60, ErrorMessage = "Genre cannot exceed 60 characters.")]
         [Display(Name = "Genre")]
         public string GenreName { get; set; }
-        public ICollection<BookGenre> ? BookGenres { get; set; }
+        public ICollection<BookGenre> BookGenres { get; set; } = new List<BookGenre>();
 
     }
 }
