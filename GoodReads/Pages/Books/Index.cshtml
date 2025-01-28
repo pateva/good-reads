@@ -2,70 +2,166 @@
 @model GoodReads.Pages.Books.IndexModel
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Books";
 }
 
-<h1>Books</h1>
+<div class="d-flex justify-content-between align-items-center">
+    <h2>All books</h2>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBookModal">
+        Add Book
+    </button>
+</div>
+<hr />
 
-<p>
-    <a asp-page="Create">Create New</a>
-</p>
+<!-- Search and Filter -->
+<form method="get" class="mb-4">
+    <div class="row g-3 align-items-center">
+        <!-- Search by Book Name -->
+        <div class="col-md-4">
+            <input type="text" id="SearchTerm" name="SearchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Enter book name..." />
+        </div>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>@Html.DisplayNameFor(model => model.Book[0].Name)</th>
-            <th>Author</th>
-            <th>Genre</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model.Book)
-        {
-            <tr>
-                <td>@Html.DisplayFor(modelItem => item.Name)</td>
-                <td>
-                    @if (item.AuthorBooks?.Any() == true)
-                    {
-                        <ul>
-                            @foreach (var authorBook in item.AuthorBooks)
+        <!-- Filter by Author -->
+        <div class="col-md-3">
+            <select id="AuthorId" name="AuthorId" class="form-control">
+                <option value="">-- All Authors --</option>
+                @foreach (var author in Model.Authors)
+                {
+                    <option value="@author.Id" selected="@(Model.AuthorId == author.Id)">
+                        @($"{author.FirstName} {author.LastName}")
+                    </option>
+                }
+            </select>
+        </div>
+
+        <!-- Filter by Genre -->
+        <div class="col-md-3">
+            <select id="GenreId" name="GenreId" class="form-control">
+                <option value="">-- All Genres --</option>
+                @foreach (var genre in Model.Genres)
+                {
+                    <option value="@genre.Id" selected="@(Model.GenreId == genre.Id)">
+                        @genre.GenreName
+                    </option>
+                }
+            </select>
+        </div>
+
+        <!-- Search Button -->
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">Search</button>
+        </div>
+    </div>
+</form>
+
+<!-- Books Listing -->
+<div class="row">
+    @foreach (var book in Model.Books)
+    {
+        <div class="col-md-4 mb-3">
+            <a class="btn btn-outline-primary w-100" asp-page="./Details" asp-route-id="@book.Id">
+                @book.Name
+            </a>
+        </div>
+    }
+</div>
+
+<!-- Modal for Adding a New Book -->
+<div class="modal fade" id="addBookModal" tabindex="-1" aria-labelledby="addBookModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addBookModalLabel">Add New Book</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <!-- Book Name -->
+                    <div class="form-group">
+                        <label asp-for="NewBook.Name" class="control-label">Book Name</label>
+                        <input asp-for="NewBook.Name" class="form-control" />
+                        <span asp-validation-for="NewBook.Name" class="text-danger"></span>
+                    </div>
+
+                    <!-- Select Authors -->
+                    <div class="form-group mt-3">
+                        <label for="SelectedAuthorIds" class="control-label">Authors</label>
+                        <select id="SelectedAuthorIds" name="SelectedAuthorIds" class="form-control" multiple>
+                            @foreach (var author in Model.Authors)
                             {
-                                <li>
-                                    @authorBook.Author.FirstName
-                                    @authorBook.Author.LastName
-                                </li>
+                                <option value="@author.Id">
+                                    @($"{author.FirstName} {author.LastName}")
+                                </option>
                             }
-                        </ul>
-                    }
-                    else
-                    {
-                        <span>-</span>
-                    }
-                </td>
-                <td>
-                    @if (item.BookGenres?.Any() == true)
-                    {
-                        <ul>
-                            @foreach (var bookGenre in item.BookGenres)
+                        </select>
+                        <small class="text-muted">Hold Ctrl (Cmd on Mac) to select multiple authors.</small>
+                    </div>
+
+                    <!-- Select Genres -->
+                    <div class="form-group mt-3">
+                        <label for="SelectedGenreIds" class="control-label">Genres</label>
+                        <select id="SelectedGenreIds" name="SelectedGenreIds" class="form-control" multiple>
+                            @foreach (var genre in Model.Genres)
                             {
-                                <li>@bookGenre.Genre.GenreName</li>
+                                <option value="@genre.Id">
+                                    @genre.GenreName
+                                </option>
                             }
-                        </ul>
-                    }
-                    else
-                    {
-                        <span>-</span>
-                    }
-                </td>
-                <td>@Html.DisplayFor(modelItem => item.CreatedAt)</td>
-                <td>@Html.DisplayFor(modelItem => item.UpdatedAt)</td>
-                <td>
-                    <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
-                    <a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+                        </select>
+                        <small class="text-muted">Hold Ctrl (Cmd on Mac) to select multiple genres.</small>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="form-group mt-3">
+                        <input type="submit" value="Add Book" class="btn btn-primary" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("_NotificationToastPartial")
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+         function showNotification(message, type) {
+                const toastElement = document.getElementById('notificationToast');
+                const toastBody = document.querySelector('#notificationToast .toast-body');
+
+                // Remove existing background classes
+                toastElement.classList.remove('text-bg-success', 'text-bg-danger');
+
+                // Set the message and background color
+                toastBody.innerText = message;
+                if (type === 'success') {
+                    toastElement.classList.add('text-bg-success');
+                } else if (type === 'error') {
+                    toastElement.classList.add('text-bg-danger');
+                }
+
+                // Display the toast
+                const toast = new bootstrap.Toast(toastElement);
+                toastElement.style.display = 'block';
+                toast.show();
+            }
+
+            // Trigger notification if TempData contains a message
+            document.addEventListener("DOMContentLoaded", function () {
+                const successMessage = "@TempData["SuccessMessage"]";
+                const errorMessage = "@TempData["ErrorMessage"]";
+
+            if (successMessage) {
+                showNotification(successMessage, 'success');
+            } else if (errorMessage) {
+                showNotification(errorMessage, 'error');
+            }
+        });
+    </script>
+}

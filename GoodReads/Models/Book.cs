@@ -17,7 +17,7 @@ namespace GoodReads.Models
         public ICollection<BookGenre> BookGenres { get; set; } = new List<BookGenre>();
         public ICollection<UserBook> UserBooks { get; set; } = new List<UserBook>();
         //TODO fix
-        public ICollection<Note> Notes { get; set; } 
+        public ICollection<Note> Notes { get; set; } = new List<Note>();
 
         public Book()
         {
