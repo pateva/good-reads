@@ -28,6 +28,16 @@ namespace GoodReads.Data
             modelBuilder.Entity<GoodReads.Models.AuthorBook>()
                 .HasKey(ab => new { ab.AuthorId, ab.BookId });
 
+            modelBuilder.Entity<AuthorBook>()
+                .HasOne(ab => ab.Author)
+                .WithMany(a => a.AuthorBooks)
+                .HasForeignKey(ab => ab.AuthorId);
+
+            modelBuilder.Entity<AuthorBook>()
+                .HasOne(ab => ab.Book)
+                .WithMany(b => b.AuthorBooks)
+                .HasForeignKey(ab => ab.BookId); ;
+
             modelBuilder.Entity<GoodReads.Models.BookGenre>()
                .HasKey(ab => new { ab.BookId, ab.GenreId });
 

@@ -17,7 +17,10 @@ namespace GoodReads.Models
         [DataType(DataType.DateTime)]
         public DateTime UpdatedAt { get; set; }
 
-        public ICollection<AuthorBook> AuthorBooks { get; set; }
+        public string? ImageUrl { get; set; }
+
+        public ICollection<AuthorBook> AuthorBooks { get; set; } = new List<AuthorBook>();
+
         public Author()
         {
             CreatedAt = DateTime.UtcNow;
