@@ -16,6 +16,9 @@ namespace GoodReads.Models
         public DateTime UpdatedAt { get; set; }
 
         public ICollection<UserBook> UserBooks { get; set; }
+        public ICollection<BookStatus> BookStatuses { get; set; } = new List<BookStatus>();
+
+        //TODO fix
         public ICollection<Note> Notes { get; set; }
 
         public User()

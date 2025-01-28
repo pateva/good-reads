@@ -1,0 +1,80 @@
+﻿@page
+@model GoodReads.Pages.Books.MyBooksModel
+
+@{
+    ViewData["Title"] = "My Books";
+}
+
+<h1 class="text-center">@($"{Model.Status} Books")</h1>
+
+<!-- Status Switcher -->
+<div class="d-flex justify-content-center mb-4">
+    <a class="btn @(Model.Status == "Read" ? "btn-primary" : "btn-outline-primary") me-2"
+       asp-page="./MyBooks" asp-route-status="Read">
+        Read
+    </a>
+    <a class="btn @(Model.Status == "WantToRead" ? "btn-primary" : "btn-outline-primary")"
+       asp-page="./MyBooks" asp-route-status="WantToRead">
+        Want to Read
+    </a>
+</div>
+
+<!-- Search and Filter -->
+<form method="get" class="mb-4">
+    <div class="row g-3 align-items-center">
+        <!-- Search by Book Name -->
+        <div class="col-md-4">
+            <input type="text" id="SearchTerm" name="SearchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Enter book name..." />
+        </div>
+
+        <!-- Filter by Author -->
+        <div class="col-md-3">
+            <select id="AuthorId" name="AuthorId" class="form-control">
+                <option value="">-- All Authors --</option>
+                @foreach (var author in Model.Authors)
+                {
+                    <option value="@author.Id" selected="@(Model.AuthorId == author.Id)">
+                        @($"{author.FirstName} {author.LastName}")
+                    </option>
+                }
+            </select>
+        </div>
+
+        <!-- Filter by Genre -->
+        <div class="col-md-3">
+            <select id="GenreId" name="GenreId" class="form-control">
+                <option value="">-- All Genres --</option>
+                @foreach (var genre in Model.Genres)
+                {
+                    <option value="@genre.Id" selected="@(Model.GenreId == genre.Id)">
+                        @genre.GenreName
+                    </option>
+                }
+            </select>
+        </div>
+
+        <!-- Search Button -->
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">Search</button>
+        </div>
+    </div>
+</form>
+
+<!-- Book Listing -->
+<div class="row">
+    @if (Model.Books != null && Model.Books.Any())
+    {
+        @foreach (var book in Model.Books)
+        {
+            <div class="col-md-4 mb-3">
+                <a class="btn btn-outline-primary w-100" asp-page="./Details" asp-route-id="@book.Id">
+                    @book.Name
+                </a>
+            </div>
+        }
+    }
+    else
+    {
+        <p class="text-center text-muted">No books found for the selected filters.</p>
+    }
+</div>

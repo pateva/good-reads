@@ -56,6 +56,19 @@ namespace GoodReads.Data
             modelBuilder.Entity<GoodReads.Models.UserBook>()
                .HasKey(ab => new { ab.BookId, ab.UserId });
 
+            // BookStatus configuration
+            modelBuilder.Entity<BookStatus>()
+                .HasOne(bs => bs.Book)
+                .WithMany(b => b.BookStatuses)
+                .HasForeignKey(bs => bs.BookId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<BookStatus>()
+                .HasOne(bs => bs.User)
+                .WithMany(u => u.BookStatuses)
+                .HasForeignKey(bs => bs.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
         }
     }
 }
