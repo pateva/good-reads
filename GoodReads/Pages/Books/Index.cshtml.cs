@@ -1,14 +1,15 @@
 ﻿using GoodReads.Data;
 using GoodReads.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Security.Claims;
+using System.Text.Json;
 
 namespace GoodReads.Pages.Books
 {
+    [Authorize]
     public class IndexModel : PageModel
     {
         private readonly GoodReadsContext _context;
@@ -18,18 +19,21 @@ namespace GoodReads.Pages.Books
             _context = context;
         }
 
-        public List<Book> Books { get; set; } = new List<Book>();
-        public List<Author> Authors { get; set; } = new List<Author>();
-        public List<Genre> Genres { get; set; } = new List<Genre>();
+        public List<Book> Books { get; set; } = new();
+        public List<Author> Authors { get; set; } = new();
+        public List<Genre> Genres { get; set; } = new();
 
         [BindProperty]
-        public Book NewBook { get; set; } = new Book();
+        public Book NewBook { get; set; } = new();
 
         [BindProperty]
-        public List<long> SelectedAuthorIds { get; set; } = new List<long>();
+        public List<long> SelectedAuthorIds { get; set; } = new();
 
         [BindProperty]
-        public List<long> SelectedGenreIds { get; set; } = new List<long>();
+        public List<long> SelectedGenreIds { get; set; } = new();
+
+        [BindProperty]
+        public long SelectedBookId { get; set; }
 
         [BindProperty(SupportsGet = true)]
         public string? SearchTerm { get; set; } = string.Empty;
@@ -42,11 +46,9 @@ namespace GoodReads.Pages.Books
 
         public async Task OnGetAsync()
         {
-            // Fetch authors and genres for the filters
             Authors = await _context.Authors.ToListAsync();
             Genres = await _context.Genres.ToListAsync();
 
-            // Fetch books
             var booksQuery = _context.Books
                 .Include(b => b.AuthorBooks)
                     .ThenInclude(ab => ab.Author)
@@ -54,38 +56,29 @@ namespace GoodReads.Pages.Books
                     .ThenInclude(bg => bg.Genre)
                 .AsQueryable();
 
-            // Apply filters
             if (!string.IsNullOrWhiteSpace(SearchTerm))
-            {
                 booksQuery = booksQuery.Where(b => b.Name.Contains(SearchTerm));
-            }
 
             if (AuthorId.HasValue)
-            {
                 booksQuery = booksQuery.Where(b => b.AuthorBooks.Any(ab => ab.AuthorId == AuthorId));
-            }
 
             if (GenreId.HasValue)
-            {
                 booksQuery = booksQuery.Where(b => b.BookGenres.Any(bg => bg.GenreId == GenreId));
-            }
 
             Books = await booksQuery.ToListAsync();
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
-            // Remove irrelevant validations like SearchTerm during POST
             ModelState.Remove("SearchTerm");
 
             if (!ModelState.IsValid)
             {
                 TempData["ErrorMessage"] = "Validation failed. Please check your input.";
-                await OnGetAsync(); // Reload data for the modal
+                await OnGetAsync();
                 return Page();
             }
 
-            // Validate if a book with the same name and authors already exists
             var existingBook = await _context.Books
                 .Include(b => b.AuthorBooks)
                 .FirstOrDefaultAsync(b =>
@@ -95,33 +88,22 @@ namespace GoodReads.Pages.Books
 
             if (existingBook != null)
             {
-                TempData["ErrorMessage"] = $"The book '{NewBook.Name}' with the same authors already exists.";
-                await OnGetAsync(); // Reload data for the modal
+                TempData["ErrorMessage"] = "The book already exists.";
+                await OnGetAsync();
                 return Page();
             }
 
-            // Add the new book
             _context.Books.Add(NewBook);
             await _context.SaveChangesAsync();
 
-            // Add author relationships
             foreach (var authorId in SelectedAuthorIds)
             {
-                _context.AuthorBooks.Add(new AuthorBook
-                {
-                    AuthorId = authorId,
-                    BookId = NewBook.Id
-                });
+                _context.AuthorBooks.Add(new AuthorBook { AuthorId = authorId, BookId = NewBook.Id });
             }
 
-            // Add genre relationships
             foreach (var genreId in SelectedGenreIds)
             {
-                _context.BookGenres.Add(new BookGenre
-                {
-                    GenreId = genreId,
-                    BookId = NewBook.Id
-                });
+                _context.BookGenres.Add(new BookGenre { GenreId = genreId, BookId = NewBook.Id });
             }
 
             await _context.SaveChangesAsync();
@@ -130,6 +112,47 @@ namespace GoodReads.Pages.Books
             return RedirectToPage();
         }
 
+        public async Task<IActionResult> OnPostUpdateStatusAsync(string Status)
+        {
+            if (SelectedBookId == 0)
+            {
+                TempData["ErrorMessage"] = "Invalid book selection.";
+                return RedirectToPage();
+            }
 
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var existingStatus = await _context.BookStatuses
+                .FirstOrDefaultAsync(bs => bs.BookId == SelectedBookId && bs.UserId == userId);
+
+            if (existingStatus != null)
+            {
+                existingStatus.Status = Enum.Parse<ReadingStatus>(Status);
+            }
+            else
+            {
+                _context.BookStatuses.Add(new BookStatus
+                {
+                    BookId = SelectedBookId,
+                    UserId = userId,
+                    Status = Enum.Parse<ReadingStatus>(Status)
+                });
+            }
+
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Book status updated successfully!";
+            return RedirectToPage();
+        }
+
+
+        public async Task<IActionResult> OnGetAuthorsAsync(long bookId)
+        {
+            var authors = await _context.AuthorBooks
+                .Where(ab => ab.BookId == bookId)
+                .Select(ab => new { ab.Author.FirstName, ab.Author.LastName })
+                .ToListAsync();
+
+            return new JsonResult(authors, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+        }
     }
 }

@@ -54,16 +54,46 @@
     </div>
 </form>
 
-<!-- Books Listing -->
 <div class="row">
     @foreach (var book in Model.Books)
     {
         <div class="col-md-4 mb-3">
-            <a class="btn btn-outline-primary w-100" asp-page="./Details" asp-route-id="@book.Id">
+            <button type="button" class="btn btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#bookModal"
+                    onclick="loadBookDetails(@book.Id, '@book.Name')">
                 @book.Name
-            </a>
+            </button>
         </div>
     }
+</div>
+
+<!-- Book Modal -->
+<div class="modal fade" id="bookModal" tabindex="-1" aria-labelledby="bookModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bookModalLabel">Book Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h5 id="modalBookTitle"></h5>
+                <p><strong>Authors:</strong> <span id="modalBookAuthors"></span></p>
+
+                <!-- Form for updating book status -->
+                <form method="post" asp-page-handler="UpdateStatus" id="bookStatusForm">
+                    <input type="hidden" id="SelectedBookId" name="SelectedBookId" />
+
+                    <div class="d-flex justify-content-around mt-3">
+                        <button type="submit" name="Status" value="Read" class="btn btn-outline-danger" onclick="setBookId(event)">
+                            ❤️ Read
+                        </button>
+                        <button type="submit" name="Status" value="WantToRead" class="btn btn-outline-success" onclick="setBookId(event)">
+                            ➕ Want to Read
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Modal for Adding a New Book -->
@@ -163,5 +193,32 @@
                 showNotification(errorMessage, 'error');
             }
         });
+
+         function loadBookDetails(bookId, bookName) {
+            document.getElementById("modalBookTitle").innerText = bookName;
+            document.getElementById("SelectedBookId").value = bookId;
+            document.getElementById("modalBookAuthors").innerText = "Loading...";
+
+            fetch(`?handler=Authors&bookId=${bookId}`)
+                .then(response => response.json())
+                .then(authors => {
+                    document.getElementById("modalBookAuthors").innerText = authors.map(a => a.firstName + " " + a.lastName).join(", ");
+                })
+                .catch(error => {
+                    document.getElementById("modalBookAuthors").innerText = "Error loading authors.";
+                });
+        }
+
+              function setBookId(event) {
+            event.preventDefault(); 
+            let selectedBookId = document.getElementById("SelectedBookId").value;
+
+            if (!selectedBookId || selectedBookId === "0") {
+                alert("Error: No book selected!");
+                return;
+            }
+
+            document.getElementById("bookStatusForm").submit();
+        }
     </script>
 }

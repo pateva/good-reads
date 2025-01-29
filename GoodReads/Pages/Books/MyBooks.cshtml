@@ -5,15 +5,15 @@
     ViewData["Title"] = "My Books";
 }
 
-<h1 class="text-center">@($"{Model.Status} Books")</h1>
+<h1 class="text-center">My Books</h1>
 
 <!-- Status Switcher -->
 <div class="d-flex justify-content-center mb-4">
-    <a class="btn @(Model.Status == "Read" ? "btn-primary" : "btn-outline-primary") me-2"
+    <a class="btn @(Model.Status == Models.ReadingStatus.Read ? "btn-primary" : "btn-outline-primary") me-2"
        asp-page="./MyBooks" asp-route-status="Read">
         Read
     </a>
-    <a class="btn @(Model.Status == "WantToRead" ? "btn-primary" : "btn-outline-primary")"
+    <a class="btn @(Model.Status ==  Models.ReadingStatus.WantToRead ? "btn-primary" : "btn-outline-primary")"
        asp-page="./MyBooks" asp-route-status="WantToRead">
         Want to Read
     </a>

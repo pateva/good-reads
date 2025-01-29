@@ -16,7 +16,7 @@ namespace GoodReads.Pages.Books
         }
 
         [BindProperty(SupportsGet = true)]
-        public string? Status { get; set; } 
+        public ReadingStatus? Status { get; set; } 
 
         [BindProperty(SupportsGet = true)]
         public string? SearchTerm { get; set; }
@@ -33,9 +33,9 @@ namespace GoodReads.Pages.Books
 
         public IList<Genre> Genres { get; set; } = new List<Genre>();
 
-        public async Task<IActionResult> OnGetAsync(string? status, string? searchTerm, long? authorId, long? genreId)
+        public async Task<IActionResult> OnGetAsync(ReadingStatus? status, string? searchTerm, long? authorId, long? genreId)
         {
-            Status = status ?? "Read";
+            Status = status ?? ReadingStatus.Read;
             SearchTerm = searchTerm;
             AuthorId = authorId;
             GenreId = genreId;
