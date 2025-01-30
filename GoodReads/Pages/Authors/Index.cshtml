@@ -12,11 +12,12 @@
 </div>
 <hr />
 
+<!-- todo add a serach by name-->
 <div class="row">
     @foreach (var author in Model.Authors)
     {
         <div class="col-md-4 mb-3">
-            <a class="btn btn-outline-primary w-100" asp-page="/Books/ByAuthor" asp-route-id="@author.Id">
+            <a class="btn btn-outline-primary w-100" asp-page="/authors/details" asp-route-id="@author.Id">
                 @($"{author.FirstName} {author.LastName}")
             </a>
         </div>

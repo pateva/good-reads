@@ -19,7 +19,8 @@ namespace GoodReads.Pages.Authors
             _context = context;
         }
 
-        public Author Author { get; set; } = default!;
+        public Author? Author { get; set; } = default!;
+        public List<Book> Books { get; set; } = new List<Book>();
 
         public async Task<IActionResult> OnGetAsync(long? id)
         {
@@ -28,16 +29,19 @@ namespace GoodReads.Pages.Authors
                 return NotFound();
             }
 
-            var author = await _context.Authors.FirstOrDefaultAsync(m => m.Id == id);
+            Author = await _context.Authors
+                .Include(a => a.AuthorBooks)
+                .ThenInclude(ab => ab.Book)
+                .FirstOrDefaultAsync(m => m.Id == id);
 
-            if (author is not null)
+            if (Author == null)
             {
-                Author = author;
-
-                return Page();
+                return NotFound();
             }
 
-            return NotFound();
+            Books = Author.AuthorBooks.Select(ab => ab.Book).ToList();
+            return Page();
         }
+ 
     }
 }
