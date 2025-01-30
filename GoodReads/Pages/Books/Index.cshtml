@@ -82,6 +82,7 @@
                 <form method="post" asp-page-handler="UpdateStatus" id="bookStatusForm">
                     <input type="hidden" id="SelectedBookId" name="SelectedBookId" />
 
+                    @* todo ONCLICK *@
                     <div class="d-flex justify-content-around mt-3">
                         <button type="submit" name="Status" value="Read" class="btn btn-outline-danger" onclick="setBookId(event)">
                             ❤️ Read
@@ -207,18 +208,6 @@
                 .catch(error => {
                     document.getElementById("modalBookAuthors").innerText = "Error loading authors.";
                 });
-        }
-
-              function setBookId(event) {
-            event.preventDefault(); 
-            let selectedBookId = document.getElementById("SelectedBookId").value;
-
-            if (!selectedBookId || selectedBookId === "0") {
-                alert("Error: No book selected!");
-                return;
-            }
-
-            document.getElementById("bookStatusForm").submit();
         }
     </script>
 }
