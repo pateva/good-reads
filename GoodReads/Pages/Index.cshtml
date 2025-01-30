@@ -4,7 +4,32 @@
     ViewData["Title"] = "Home page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+@if (User.Identity.IsAuthenticated)
+{
+    <h2 class="mt-5">📖 My Books</h2>
+    <div class="row">
+        @foreach (var book in Model.MyBooks)
+        {
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">@book.Name</h5>
+                        <p class="text-muted">
+                            @if (!string.IsNullOrEmpty(book.CurrentUserStatus.ToString()))
+                            {
+                                <span>Status: @book.CurrentUserStatus</span>
+                            }
+                            else
+                            {
+                                <span class="text-danger">No status</span>
+                            }
+                        </p>
+                        <a href="/Books/Details/@book.Id" class="btn btn-outline-success">View</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+

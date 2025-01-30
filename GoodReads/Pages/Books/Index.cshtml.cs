@@ -46,7 +46,7 @@ namespace GoodReads.Pages.Books
 
         public async Task OnGetAsync()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Get logged-in user ID
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             Authors = await _context.Authors.ToListAsync();
             Genres = await _context.Genres.ToListAsync();
@@ -56,7 +56,7 @@ namespace GoodReads.Pages.Books
                     .ThenInclude(ab => ab.Author)
                 .Include(b => b.BookGenres)
                     .ThenInclude(bg => bg.Genre)
-                .Include(b => b.BookStatuses) // ✅ Include BookStatuses
+                .Include(b => b.BookStatuses) 
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(SearchTerm))
@@ -70,11 +70,10 @@ namespace GoodReads.Pages.Books
 
             var books = await booksQuery.ToListAsync();
 
-            // ✅ Attach the Current User's Status to each Book
             Books = books.Select(b =>
             {
                 var userStatus = b.BookStatuses.FirstOrDefault(bs => bs.UserId == userId);
-                b.CurrentUserStatus = userStatus?.Status; // Convert Enum to String
+                b.CurrentUserStatus = userStatus?.Status; 
                 return b;
             }).ToList();
         }
@@ -137,7 +136,6 @@ namespace GoodReads.Pages.Books
             var existingStatus = await _context.BookStatuses
                 .FirstOrDefaultAsync(bs => bs.BookId == SelectedBookId && bs.UserId == userId);
 
-            // ✅ Remove the status if the user clicked "Remove from Read" or "Remove from List"
             if (existingStatus != null && (Status == "RemoveRead" || Status == "RemoveWantToRead"))
             {
                 _context.BookStatuses.Remove(existingStatus);
@@ -146,7 +144,6 @@ namespace GoodReads.Pages.Books
                 return RedirectToPage();
             }
 
-            // ✅ Otherwise, update or add the status
             if (existingStatus != null)
             {
                 existingStatus.Status = Enum.Parse<ReadingStatus>(Status);
