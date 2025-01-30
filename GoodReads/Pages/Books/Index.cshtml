@@ -59,12 +59,13 @@
     {
         <div class="col-md-4 mb-3">
             <button type="button" class="btn btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#bookModal"
-                    onclick="loadBookDetails(@book.Id, '@book.Name')">
+                    onclick="loadBookDetails(@book.Id, '@book.Name', '@(book.CurrentUserStatus.HasValue ? book.CurrentUserStatus.ToString() : "None")')">
                 @book.Name
             </button>
         </div>
     }
 </div>
+
 
 <!-- Book Modal -->
 <div class="modal fade" id="bookModal" tabindex="-1" aria-labelledby="bookModalLabel" aria-hidden="true">
@@ -82,12 +83,14 @@
                 <form method="post" asp-page-handler="UpdateStatus" id="bookStatusForm">
                     <input type="hidden" id="SelectedBookId" name="SelectedBookId" />
 
-                    @* todo ONCLICK *@
                     <div class="d-flex justify-content-around mt-3">
-                        <button type="submit" name="Status" value="Read" class="btn btn-outline-danger" onclick="setBookId(event)">
+                        <!-- Read Button -->
+                        <button type="submit" id="readButton" name="Status" value="Read" class="btn btn-outline-danger" onclick="setBookId(event)">
                             ❤️ Read
                         </button>
-                        <button type="submit" name="Status" value="WantToRead" class="btn btn-outline-success" onclick="setBookId(event)">
+
+                        <!-- Want to Read Button -->
+                        <button type="submit" id="wantToReadButton" name="Status" value="WantToRead" class="btn btn-outline-success" onclick="setBookId(event)">
                             ➕ Want to Read
                         </button>
                     </div>
@@ -195,7 +198,7 @@
             }
         });
 
-         function loadBookDetails(bookId, bookName) {
+        function loadBookDetails(bookId, bookName, bookStatus) {
             document.getElementById("modalBookTitle").innerText = bookName;
             document.getElementById("SelectedBookId").value = bookId;
             document.getElementById("modalBookAuthors").innerText = "Loading...";
@@ -208,6 +211,34 @@
                 .catch(error => {
                     document.getElementById("modalBookAuthors").innerText = "Error loading authors.";
                 });
+
+            const readButton = document.getElementById("readButton");
+            const wantToReadButton = document.getElementById("wantToReadButton");
+
+            if (bookStatus === "Read") {
+                readButton.innerHTML = "💔 Remove from Read";
+                readButton.classList.remove("btn-outline-danger");
+                readButton.classList.add("btn-secondary");
+                readButton.setAttribute("value", "RemoveRead");
+            } else {
+                readButton.innerHTML = "❤️ Read";
+                readButton.classList.remove("btn-secondary");
+                readButton.classList.add("btn-outline-danger");
+                readButton.setAttribute("value", "Read");
+            }
+
+            if (bookStatus === "WantToRead") {
+                wantToReadButton.innerHTML = "➖ Remove from List";
+                wantToReadButton.classList.remove("btn-outline-success");
+                wantToReadButton.classList.add("btn-secondary");
+                wantToReadButton.setAttribute("value", "RemoveWantToRead");
+            } else {
+                wantToReadButton.innerHTML = "➕ Want to Read";
+                wantToReadButton.classList.remove("btn-secondary");
+                wantToReadButton.classList.add("btn-outline-success");
+                wantToReadButton.setAttribute("value", "WantToRead");
+            }
         }
+
     </script>
 }

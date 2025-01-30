@@ -36,7 +36,7 @@ namespace GoodReads.Pages.Books
 
         public async Task<IActionResult> OnGetAsync(ReadingStatus? status, string? searchTerm, long? authorId, long? genreId)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Fix user filtering
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null)
             {
                 TempData["ErrorMessage"] = "User not found.";
@@ -54,19 +54,16 @@ namespace GoodReads.Pages.Books
 
             // Base query: Get books linked to the current user's BookStatus
             var query = _context.BookStatuses
-                .Where(bs => bs.UserId == userId && bs.Status == Status) // Ensure correct user filtering
+                .Where(bs => bs.UserId == userId && bs.Status == Status) 
                 .Include(bs => bs.Book)
                     .ThenInclude(b => b.AuthorBooks)
                         .ThenInclude(ab => ab.Author)
                 .Include(bs => bs.Book)
                     .ThenInclude(b => b.BookGenres)
                         .ThenInclude(bg => bg.Genre)
-                .Select(bs => bs.Book) // Selecting only books
-
-                // Important: Materializing the query (ensures no missing ToListAsync())
+                .Select(bs => bs.Book) 
                 .AsQueryable();
 
-            // Apply search term filter
             if (!string.IsNullOrWhiteSpace(SearchTerm))
             {
                 query = query.Where(book =>
@@ -76,19 +73,16 @@ namespace GoodReads.Pages.Books
                 );
             }
 
-            // Apply author filter
             if (AuthorId.HasValue)
             {
                 query = query.Where(book => book.AuthorBooks.Any(ab => ab.AuthorId == AuthorId.Value));
             }
 
-            // Apply genre filter
             if (GenreId.HasValue)
             {
                 query = query.Where(book => book.BookGenres.Any(bg => bg.GenreId == GenreId.Value));
             }
 
-            // Execute query and store results
             Books = await query.ToListAsync();
 
             return Page();

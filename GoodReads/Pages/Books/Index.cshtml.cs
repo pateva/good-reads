@@ -46,6 +46,8 @@ namespace GoodReads.Pages.Books
 
         public async Task OnGetAsync()
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Get logged-in user ID
+
             Authors = await _context.Authors.ToListAsync();
             Genres = await _context.Genres.ToListAsync();
 
@@ -54,6 +56,7 @@ namespace GoodReads.Pages.Books
                     .ThenInclude(ab => ab.Author)
                 .Include(b => b.BookGenres)
                     .ThenInclude(bg => bg.Genre)
+                .Include(b => b.BookStatuses) // ✅ Include BookStatuses
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(SearchTerm))
@@ -65,8 +68,17 @@ namespace GoodReads.Pages.Books
             if (GenreId.HasValue)
                 booksQuery = booksQuery.Where(b => b.BookGenres.Any(bg => bg.GenreId == GenreId));
 
-            Books = await booksQuery.ToListAsync();
+            var books = await booksQuery.ToListAsync();
+
+            // ✅ Attach the Current User's Status to each Book
+            Books = books.Select(b =>
+            {
+                var userStatus = b.BookStatuses.FirstOrDefault(bs => bs.UserId == userId);
+                b.CurrentUserStatus = userStatus?.Status; // Convert Enum to String
+                return b;
+            }).ToList();
         }
+
 
         public async Task<IActionResult> OnPostAsync()
         {
@@ -112,7 +124,7 @@ namespace GoodReads.Pages.Books
             return RedirectToPage();
         }
 
-        public async Task<IActionResult> OnPostUpdateStatusAsync(long SelectedBookId, string? status)
+        public async Task<IActionResult> OnPostUpdateStatusAsync(string Status)
         {
             if (SelectedBookId == 0)
             {
@@ -121,23 +133,23 @@ namespace GoodReads.Pages.Books
             }
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null)
-            {
-                TempData["ErrorMessage"] = "User not found.";
-                return RedirectToPage();
-            }
-
-            if (!Enum.TryParse(status, out ReadingStatus parsedStatus))
-            {
-                parsedStatus = ReadingStatus.Read; 
-            }
 
             var existingStatus = await _context.BookStatuses
                 .FirstOrDefaultAsync(bs => bs.BookId == SelectedBookId && bs.UserId == userId);
 
+            // ✅ Remove the status if the user clicked "Remove from Read" or "Remove from List"
+            if (existingStatus != null && (Status == "RemoveRead" || Status == "RemoveWantToRead"))
+            {
+                _context.BookStatuses.Remove(existingStatus);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Book removed from your list.";
+                return RedirectToPage();
+            }
+
+            // ✅ Otherwise, update or add the status
             if (existingStatus != null)
             {
-                existingStatus.Status = parsedStatus; 
+                existingStatus.Status = Enum.Parse<ReadingStatus>(Status);
             }
             else
             {
@@ -145,14 +157,16 @@ namespace GoodReads.Pages.Books
                 {
                     BookId = SelectedBookId,
                     UserId = userId,
-                    Status = parsedStatus 
-                }); 
+                    Status = Enum.Parse<ReadingStatus>(Status)
+                });
             }
 
             await _context.SaveChangesAsync();
             TempData["SuccessMessage"] = "Book status updated successfully!";
             return RedirectToPage();
         }
+
+
 
 
         public async Task<IActionResult> OnGetAuthorsAsync(long bookId)

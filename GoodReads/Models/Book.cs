@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GoodReads.Models
 {
@@ -26,5 +27,8 @@ namespace GoodReads.Models
             CreatedAt = DateTime.UtcNow;
             UpdatedAt = DateTime.UtcNow;
         }
+
+        [NotMapped]
+        public ReadingStatus? CurrentUserStatus { get; set; }
     }
 }
