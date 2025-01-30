@@ -14,25 +14,9 @@ namespace GoodReads.Models
         public DateTime CreatedAt { get; set; }
         [DataType(DataType.DateTime)]
         public DateTime UpdatedAt { get; set; }
-
         public ICollection<UserBook> UserBooks { get; set; }
         public ICollection<BookStatus> BookStatuses { get; set; } = new List<BookStatus>();
-
-        //TODO fix
         public ICollection<Note> Notes { get; set; }
 
-        public User()
-        {
-            CreatedAt = DateTime.UtcNow;
-            UpdatedAt = DateTime.UtcNow;
-        }
-
-        public User(String firstNmae, String lastName)
-        {
-            this.LastName = lastName;
-            this.FirstName = firstNmae;
-            CreatedAt = DateTime.UtcNow;
-            UpdatedAt = DateTime.UtcNow;
-        }
     }
 }

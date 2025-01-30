@@ -20,9 +20,9 @@ namespace GoodReads.Models
         public DateTime UpdatedAt { get; set; }
 
         [ForeignKey(nameof(UserId))]
-        public User User { get; set; }
+        public User? User { get; set; }
 
         [ForeignKey(nameof(BookId))]
-        public Book Book { get; set; }
+        public Book? Book { get; set; }
     }
 }
