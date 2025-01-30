@@ -3,6 +3,7 @@ using GoodReads.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace GoodReads.Pages.Books
 {
@@ -35,6 +36,13 @@ namespace GoodReads.Pages.Books
 
         public async Task<IActionResult> OnGetAsync(ReadingStatus? status, string? searchTerm, long? authorId, long? genreId)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Fix user filtering
+            if (userId == null)
+            {
+                TempData["ErrorMessage"] = "User not found.";
+                return RedirectToPage();
+            }
+
             Status = status ?? ReadingStatus.Read;
             SearchTerm = searchTerm;
             AuthorId = authorId;
@@ -44,16 +52,19 @@ namespace GoodReads.Pages.Books
             Authors = await _context.Authors.ToListAsync();
             Genres = await _context.Genres.ToListAsync();
 
-            // Base query to get books by status
+            // Base query: Get books linked to the current user's BookStatus
             var query = _context.BookStatuses
+                .Where(bs => bs.UserId == userId && bs.Status == Status) // Ensure correct user filtering
                 .Include(bs => bs.Book)
                     .ThenInclude(b => b.AuthorBooks)
                         .ThenInclude(ab => ab.Author)
                 .Include(bs => bs.Book)
                     .ThenInclude(b => b.BookGenres)
                         .ThenInclude(bg => bg.Genre)
-                .Where(bs => bs.UserId == User.Identity.Name && bs.Status == Status)
-                .Select(bs => bs.Book);
+                .Select(bs => bs.Book) // Selecting only books
+
+                // Important: Materializing the query (ensures no missing ToListAsync())
+                .AsQueryable();
 
             // Apply search term filter
             if (!string.IsNullOrWhiteSpace(SearchTerm))
@@ -77,8 +88,11 @@ namespace GoodReads.Pages.Books
                 query = query.Where(book => book.BookGenres.Any(bg => bg.GenreId == GenreId.Value));
             }
 
+            // Execute query and store results
             Books = await query.ToListAsync();
+
             return Page();
         }
+
     }
 }
