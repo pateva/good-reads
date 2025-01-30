@@ -26,13 +26,12 @@ namespace GoodReads.Pages
 
             if (userId == null)
             {
-                MyBooks = new List<Book>(); // Ensure no error for non-logged-in users
+                MyBooks = new List<Book>(); 
                 return;
             }
 
-            // Fetch books where the user has set a status
             var booksQuery = _context.BookStatuses
-                .Where(bs => bs.UserId == userId)  // Only get books related to the user
+                .Where(bs => bs.UserId == userId) 
                 .Include(bs => bs.Book)
                     .ThenInclude(b => b.AuthorBooks)
                         .ThenInclude(ab => ab.Author)
