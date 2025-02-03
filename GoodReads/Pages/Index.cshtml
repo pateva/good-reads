@@ -1,35 +1,46 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Home Page";
 }
 
 @if (User.Identity.IsAuthenticated)
 {
     <h2 class="mt-5">📖 My Books</h2>
+
+    <!-- Want to Read Books -->
+    <h3 class="mt-4">📌 Want to Read</h3>
+    <hr class="mb-3">
     <div class="row">
-        @foreach (var book in Model.MyBooks)
+        @foreach (var book in Model.MyBooks.Where(b => b.CurrentUserStatus == Models.ReadingStatus.WantToRead))
         {
             <div class="col-md-4 mb-3">
-                <div class="card">
-                    <div class="card-body text-center">
+                <div class="card h-100 shadow">
+                    <div class="card-body text-center d-flex flex-column justify-content-between">
                         <h5 class="card-title">@book.Name</h5>
-                        <p class="text-muted">
-                            @if (!string.IsNullOrEmpty(book.CurrentUserStatus.ToString()))
-                            {
-                                <span>Status: @book.CurrentUserStatus</span>
-                            }
-                            else
-                            {
-                                <span class="text-danger">No status</span>
-                            }
-                        </p>
-                        <a href="/Books/Details/@book.Id" class="btn btn-outline-success">View</a>
+                        <p class="text-muted">Status: Want to Read</p>
+                        <a href="/Books/Details/@book.Id" class="btn btn-outline-success mt-auto">View</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Read Books -->
+    <h3 class="mt-4">✔️ Read</h3>
+    <hr class="mb-3">
+    <div class="row">
+        @foreach (var book in Model.MyBooks.Where(b => b.CurrentUserStatus == Models.ReadingStatus.Read))
+        {
+            <div class="col-md-4 mb-3">
+                <div class="card h-100 shadow">
+                    <div class="card-body text-center d-flex flex-column justify-content-between">
+                        <h5 class="card-title">@book.Name</h5>
+                        <p class="text-muted">Status: Read</p>
+                        <a href="/Books/Details/@book.Id" class="btn btn-outline-primary mt-auto">View</a>
                     </div>
                 </div>
             </div>
         }
     </div>
 }
-
-
