@@ -23,24 +23,35 @@ namespace GoodReads.Pages.Books
         [BindProperty]
         public Note NewNote { get; set; } = default!;
 
-        public async Task<IActionResult> OnGetAsync(int id)
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        [BindProperty(SupportsGet = true)]
+        public int PageNumber { get; set; } = 1;
 
+        private const int PageSize = 5; 
+
+        public async Task<IActionResult> OnGetAsync(long id)
+        {
             Book = await _context.Books
-                .Include(b => b.AuthorBooks)
-                    .ThenInclude(ab => ab.Author)
-                .FirstOrDefaultAsync(b => b.Id == id);
+                .Include(b => b.AuthorBooks).ThenInclude(ab => ab.Author)
+                .FirstOrDefaultAsync(m => m.Id == id);
 
             if (Book == null)
             {
                 return NotFound();
             }
 
-            Notes = await _context.Notes
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var notesQuery = _context.Notes
                 .Where(n => n.BookId == id)
-                .OrderByDescending(n => n.UserId == userId) // User notes first
-                .ThenByDescending(n => n.CreatedAt)
+                .OrderByDescending(n => n.CreatedAt)
+                .AsQueryable();
+
+            int totalNotes = await notesQuery.CountAsync();
+            ViewData["TotalPages"] = (int)Math.Ceiling(totalNotes / (double)PageSize);
+
+            Notes = await notesQuery
+                .Skip((PageNumber - 1) * PageSize)
+                .Take(PageSize)
                 .ToListAsync();
 
             return Page();

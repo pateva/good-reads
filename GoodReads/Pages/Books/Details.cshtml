@@ -23,37 +23,48 @@
 
     <h3>Notes</h3>
     <hr />
-
     @if (Model.Notes.Any())
     {
         <div class="list-group">
             @foreach (var note in Model.Notes)
             {
-                <div class="list-group-item d-flex justify-content-between align-items-center">
-                    <div>
-                        <strong>@(note.UserId == userId ? "You" : note.User.FirstName + " " + note.User.LastName):</strong>
-                        <p>@note.Text</p>
-                        <small class="text-muted">Created: @note.CreatedAt.ToString("g")</small>
-                    </div>
-                    @if (note.UserId == userId)
-                    {
-                        <div>
-                            <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editNoteModal" onclick="loadNoteDetails(@note.Id, '@note.Text')">✏️ Edit</button>
-                            <form method="post" asp-page-handler="DeleteNote" class="d-inline">
-                                <input type="hidden" name="NoteId" value="@note.Id" />
-                                <button type="submit" class="btn btn-sm btn-danger">🗑️ Delete</button>
-                            </form>
-                        </div>
-                    }
+                <div class="list-group-item">
+                    <p>@note.Text</p>
+                    <small class="text-muted">@note.CreatedAt.ToShortDateString()</small>
                 </div>
             }
         </div>
+
+        <!-- Pagination Controls -->
+        <nav aria-label="Note Pagination">
+            <ul class="pagination mt-3">
+                @if (Model.PageNumber > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-route-pageNumber="@(Model.PageNumber - 1)">Previous</a>
+                    </li>
+                }
+
+                @for (var i = 1; i <= (int)ViewData["TotalPages"]; i++)
+                {
+                    <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                        <a class="page-link" asp-route-pageNumber="@i">@i</a>
+                    </li>
+                }
+
+                @if (Model.PageNumber < (int)ViewData["TotalPages"])
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-route-pageNumber="@(Model.PageNumber + 1)">Next</a>
+                    </li>
+                }
+            </ul>
+        </nav>
     }
     else
     {
-        <p class="text-muted">No notes available for this book.</p>
+        <p>No notes found for this book.</p>
     }
-</div>
 
 <!-- Add Note Modal -->
 <div class="modal fade" id="addNoteModal" tabindex="-1" aria-labelledby="addNoteModalLabel" aria-hidden="true">
